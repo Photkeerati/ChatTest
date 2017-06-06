@@ -154,7 +154,7 @@ public partial class MBXChat {
 
 	void IChatClientListener.OnPrivateMessage (string sender, object message, string channelName)
 	{
-		Debug.Log ("OnPrivateMessage : " + sender);
+		Debug.Log ("OnPrivateMessage  " + "["+ channelName +"]" + sender + ": " + message );
 	}
 
 	void IChatClientListener.OnSubscribed (string[] channels, bool[] results)
