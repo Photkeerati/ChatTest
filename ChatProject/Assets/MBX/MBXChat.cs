@@ -15,6 +15,7 @@ public partial class MBXChat : MonoBehaviour  , IChatClientListener {
 
 	// Use this for initialization
 	void Start () {
+		Application.runInBackground = true;
 		Connect ();
 	}
 	
