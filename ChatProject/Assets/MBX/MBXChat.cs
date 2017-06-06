@@ -11,6 +11,8 @@ public partial class MBXChat : MonoBehaviour  , IChatClientListener {
 	ChatClient chatClient;
 	public string UserName = "";
 	public string ChannelName = "MBXRoom";
+	public int HistoryLengthToFetch;
+
 	public InputField InputChat;
 
 	// Use this for initialization

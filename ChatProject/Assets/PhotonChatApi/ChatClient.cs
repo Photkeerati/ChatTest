@@ -45,7 +45,7 @@ namespace ExitGames.Client.Photon.Chat
         public string FrontendAddress { get; private set; }
 
         /// <summary>Region used to connect to. Currently all chat is done in EU. It can make sense to use only one region for the whole game.</summary>
-        private string chatRegion = "EU";
+        private string chatRegion = "US";
 
         /// <summary>Settable only before you connect! Defaults to "EU".</summary>
         public string ChatRegion
