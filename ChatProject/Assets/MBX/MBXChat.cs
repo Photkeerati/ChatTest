@@ -81,7 +81,7 @@ public partial class MBXChat {
 	void IChatClientListener.OnConnected ()
 	{
 		Debug.Log ("OnConnected");
-		chatClient.Subscribe (new string[] { ChannelName });
+		chatClient.Subscribe (new string[] { ChannelName } ,HistoryLengthToFetch);
 	}
 
 	void IChatClientListener.OnChatStateChange (ChatState state)
