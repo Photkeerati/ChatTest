@@ -10,14 +10,20 @@ public partial class MBXChat : MonoBehaviour  , IChatClientListener {
 
 	ChatClient chatClient;
 	public string UserName = "";
+	public string FriendName = "";
+	public string FriendList = "";
 	public string ChannelName = "MBXRoom";
 	public int HistoryLengthToFetch;
+	public bool OnlineStatus = false;
+
+	bool IsPrivateMessage = false;
 
 	public InputField InputChat;
+	public Text RoomStatusLabel;
 
 	// Use this for initialization
 	void Start () {
-		Application.runInBackground = true;
+		initValue ();
 		Connect ();
 	}
 	
@@ -26,13 +32,33 @@ public partial class MBXChat : MonoBehaviour  , IChatClientListener {
 		if (chatClient != null)
 			chatClient.Service ();
 	}
-		
 
-	public void Connect() {
+	void initValue() {
+		Application.runInBackground = true;
 		var connectedProtocol = ExitGames.Client.Photon.ConnectionProtocol.Udp;
 		chatClient = new ChatClient (this, connectedProtocol);
 		chatClient.ChatRegion = "US";
+		Debug.LogError (IsPrivateMessage);
+		if (IsPrivateMessage) {
+			Debug.Log ("Private");
+			RoomStatusLabel.text = "Room : Private";
+//			string [] friendList = FriendList.Split (',');
+//			chatClient.AddFriends (friendList);
 
+		} else {
+			RoomStatusLabel.text = "Room : Public";
+		}
+
+		if (OnlineStatus) {
+			chatClient.SetOnlineStatus (ChatUserStatus.Online, "I'm here");
+		} else {
+			chatClient.SetOnlineStatus (ChatUserStatus.Offline, "I'm here");
+		}
+
+	}
+		
+
+	public void Connect() {
 		var authValues =  new ExitGames.Client.Photon.Chat.AuthenticationValues ();
 		authValues.UserId = UserName;
 		authValues.AuthType = ExitGames.Client.Photon.Chat.CustomAuthenticationType.None;
@@ -52,19 +78,44 @@ public partial class MBXChat : MonoBehaviour  , IChatClientListener {
 	}
 
 	void SendChatMessage(string text) {
-		chatClient.PublishMessage (ChannelName, text);
+		if (IsPrivateMessage) {
+			chatClient.SendPrivateMessage (FriendName, text);
+		} else {
+			chatClient.PublishMessage (ChannelName, text);
+		}
+
 
 	}
 
 
+	public void OnConnect() {
+		initValue ();
+		Connect ();
+	}
+
+	public void OnDisConnect(){ 
+		disConnect ();
+	}
+
+	public void OnSwitchRoom() {
+		disConnect ();
+		IsPrivateMessage = !IsPrivateMessage;
+		OnConnect ();
+	}
+
+	void OnApplicationQuit() {
+		disConnect ();
+	}
+
+	void disConnect() {
+		if (chatClient != null) { chatClient.Disconnect(); }
+	}
 
 }
 
 public partial class MBXChat {
 
-	void OnApplicationQuit() {
-		if (chatClient != null) { chatClient.Disconnect(); }
-	}
+
 
 	#region IChatClientListener implementation
 
@@ -81,7 +132,7 @@ public partial class MBXChat {
 	void IChatClientListener.OnConnected ()
 	{
 		Debug.Log ("OnConnected");
-		chatClient.Subscribe (new string[] { ChannelName } ,HistoryLengthToFetch);
+		chatClient.Subscribe (new string[] { ChannelName },HistoryLengthToFetch);
 	}
 
 	void IChatClientListener.OnChatStateChange (ChatState state)
@@ -95,7 +146,7 @@ public partial class MBXChat {
 		string msgs = "";
 		for ( int i = 0; i < senders.Length; i++ )
 		{
-			msgs = string.Format("{0}{1}={2}, ", msgs, senders[i], messages[i]);
+			msgs = string.Format("{0}{1}={2}, ", msgs, senders[i], messages[i]) + "\n";
 		}
 		Debug.Log (string.Format("OnGetMessages: {0} ({1}) > {2}", channelName, senders.Length, msgs) );
 
@@ -118,7 +169,7 @@ public partial class MBXChat {
 
 	void IChatClientListener.OnStatusUpdate (string user, int status, bool gotMessage, object message)
 	{
-		Debug.Log ("OnStateUpdate");
+		Debug.Log (string.Format("Status change for : {0} to: {1}", user, status));
 	}
 
 	#endregion
